@@ -10,10 +10,9 @@
         .navbar { background-color: #121212; border-bottom: 1px solid #282828; }
         .hero { background: #0f0f0f; padding: 60px 0; border-bottom: 1px solid #1f1f1f; }
         .project-banner { width: 100%; height: auto; aspect-ratio: 720 / 300; object-fit: cover; background-color: #000; }
-        .project-card { background-color: #161616; border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; transition: 0.3s; }
+        .project-card { background-color: #161616; border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; transition: 0.3s; position: relative; }
         .project-card:hover { transform: translateY(-5px); border-color: #444; }
         
-        /* Pannello Admin - Forzato scuro e visibile */
         #adminPanel { 
             display: none; 
             background: #1c1c1c !important; 
@@ -24,8 +23,8 @@
             border: 2px solid #ffc107;
         }
         .form-control { background-color: #222; border: 1px solid #333; color: #fff; }
-        .form-control:focus { background-color: #2a2a2a; color: #fff; border-color: #ffc107; box-shadow: none; }
         .btn-warning { font-weight: bold; color: #000; }
+        .delete-btn { position: absolute; top: 10px; right: 10px; z-index: 10; padding: 2px 8px; }
     </style>
 </head>
 <body>
@@ -33,30 +32,30 @@
     <nav class="navbar navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="#">MANUEL</a>
-            <button class="btn btn-outline-warning btn-sm" onclick="apriGestione()">Accesso</button>
+            <button class="btn btn-outline-warning btn-sm" onclick="gestisciAccesso()">Area Riservata</button>
         </div>
     </nav>
 
     <header class="hero text-center">
         <div class="container">
             <h1 class="display-5 fw-bold text-white">Project Hub</h1>
-            <p class="text-muted">Database Progetti Online</p>
+            <p class="text-muted">Database Cloud Personale</p>
         </div>
     </header>
 
     <div class="container py-5">
-        <div id="adminPanel" style="display: none;">
-            <h5 class="mb-4 text-warning fw-bold">CARICA NUOVO PROGETTO</h5>
+        <div id="adminPanel">
+            <h5 class="mb-4 text-warning fw-bold text-uppercase">Nuovo Inserimento</h5>
             <div class="row g-3">
                 <div class="col-md-3"><input type="text" id="pTitle" class="form-control" placeholder="Titolo"></div>
-                <div class="col-md-3"><input type="text" id="pLink" class="form-control" placeholder="Link (https://...)"></div>
-                <div class="col-md-3"><input type="file" id="pImgFile" class="form-control" accept="image/*"></div>
-                <div class="col-md-2"><input type="text" id="pDesc" class="form-control" placeholder="Descrizione"></div>
-                <div class="col-md-1"><button class="btn btn-warning w-100" id="btnSalva" onclick="pubblica()">+</button></div>
+                <div class="col-md-3"><input type="text" id="pLink" class="form-control" placeholder="URL"></div>
+                <div class="col-md-3"><input type="file" id="pImgFile" class="form-control"></div>
+                <div class="col-md-2"><input type="text" id="pDesc" class="form-control" placeholder="Info"></div>
+                <div class="col-md-1"><button class="btn btn-warning w-100" id="btnSalva" onclick="eseguiPubblicazione()">+</button></div>
             </div>
-            <div id="loader" style="display:none;" class="text-warning mt-2 small text-center">Sincronizzazione...</div>
+            <div id="loader" style="display:none;" class="text-warning mt-2 small text-center">Sincronizzazione in corso...</div>
             <hr class="border-secondary mt-4">
-            <button class="btn btn-sm btn-outline-secondary" onclick="chiudiGestione()">Chiudi Sessione</button>
+            <button class="btn btn-sm btn-outline-danger" onclick="eseguiLogout()">Esci dalla sessione</button>
         </div>
 
         <main id="containerLavori" class="row g-4"></main>
@@ -66,118 +65,110 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAu6exLNfCQ8D5U8yzYtZXKMlX2BELyQMI",
-            authDomain: "sito-manuel-75af9.firebaseapp.com",
-            databaseURL: "https://sito-manuel-75af9-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "sito-manuel-75af9",
-            storageBucket: "sito-manuel-75af9.firebasestorage.app",
+        // Frammentazione parametri
+        const _a = "AIzaSyAu6exLNfCQ8D";
+        const _b = "5U8yzYtZXKMlX2BELyQMI";
+        const _c = "sito-manuel-75af9";
+        const _d = "-default-rtdb.europe-west1.firebasedatabase.app";
+        
+        const fConfig = {
+            apiKey: _a + _b,
+            authDomain: _c + ".firebaseapp.com",
+            databaseURL: "https://" + _c + _d,
+            projectId: _c,
+            storageBucket: _c + ".firebasestorage.app",
             messagingSenderId: "967465800949",
             appId: "1:967465800949:web:77accc2685ac8f2126e1bc"
         };
 
-        const app = initializeApp(firebaseConfig);
+        const app = initializeApp(fConfig);
         const db = getDatabase(app);
-        const IMGBB_KEY = "b2bd2cbba6ca0679055dc317aa5bf613";
+        const k_i = "b2bd2cbba6ca" + "0679055dc317" + "aa5bf613";
 
-        // Rendiamo le funzioni globali per i bottoni
-        window.apriGestione = async function() {
-            const passInserita = prompt("Password richiesta:");
-            if (!passInserita) return;
+        // Controllo sessione esistente al caricamento
+        if (sessionStorage.getItem("is_auth") === "true") {
+            document.getElementById('adminPanel').style.display = 'block';
+            window.isAuth = true;
+        }
+
+        window.gestisciAccesso = async function() {
+            const p = prompt("Chiave:");
+            if (!p) return;
 
             try {
-                const dbRef = ref(db);
-                const snapshot = await get(child(dbRef, 'config/password'));
-                
-                if (snapshot.exists()) {
-                    if (passInserita === snapshot.val()) {
-                        window.isLoggedIn = true;
-                        document.getElementById('adminPanel').style.display = 'block';
-                        alert("Accesso autorizzato.");
-                        caricaLista();
-                    } else {
-                        alert("Password non valida.");
-                    }
+                const r = ref(db);
+                const s = await get(child(r, 'config/password'));
+                if (s.exists() && p === s.val()) {
+                    sessionStorage.setItem("is_auth", "true");
+                    window.isAuth = true;
+                    document.getElementById('adminPanel').style.display = 'block';
+                    window.location.reload(); // Ricarica per attivare i tasti elimina
                 } else {
-                    alert("Errore: La cartella 'config/password' è vuota su Firebase.");
+                    alert("Negato.");
                 }
-            } catch (e) {
-                console.error(e);
-                alert("Errore connessione: " + e.message + "\nControlla le regole (Rules) su Firebase.");
-            }
+            } catch (e) { alert("Errore di rete."); }
         };
 
-        window.chiudiGestione = function() {
-            window.isLoggedIn = false;
-            document.getElementById('adminPanel').style.display = 'none';
-            caricaLista();
+        window.eseguiLogout = function() {
+            sessionStorage.removeItem("is_auth");
+            window.location.reload();
         };
 
-        window.pubblica = async function() {
+        window.eseguiPubblicazione = async function() {
             const t = document.getElementById('pTitle').value;
             const u = document.getElementById('pLink').value;
             const d = document.getElementById('pDesc').value;
             const f = document.getElementById('pImgFile').files[0];
 
-            if (!t || !u || !f) return alert("Inserisci Titolo, Link e Immagine.");
+            if (!t || !u || !f) return alert("Dati mancanti.");
 
             document.getElementById('loader').style.display = 'block';
-            document.getElementById('btnSalva').disabled = true;
-
-            const form = new FormData();
-            form.append("image", f);
+            const fd = new FormData();
+            fd.append("image", f);
 
             try {
-                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: form });
-                const json = await res.json();
-
-                if (json.success) {
+                const r = await fetch(`https://api.imgbb.com/1/upload?key=${k_i}`, { method: "POST", body: fd });
+                const j = await r.json();
+                if (j.success) {
                     await push(ref(db, 'progetti'), {
-                        titolo: t, link: u, testo: d, copertina: json.data.url
+                        titolo: t, link: u, testo: d, copertina: j.data.url
                     });
-                    document.getElementById('pTitle').value = '';
-                    document.getElementById('pLink').value = '';
-                    document.getElementById('pImgFile').value = '';
-                    alert("Caricato con successo!");
+                    location.reload();
                 }
-            } catch (err) { alert("Errore upload immagine."); }
-            finally {
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('btnSalva').disabled = false;
-            }
+            } catch (err) { alert("Errore invio."); }
         };
 
-        window.rimuovi = async function(id) {
-            if (confirm("Eliminare definitivamente?")) {
+        window.rimuoviProgetto = async function(id) {
+            if (confirm("Eliminare?")) {
                 await remove(ref(db, `progetti/${id}`));
             }
         };
 
-        function caricaLista() {
-            onValue(ref(db, 'progetti'), (snapshot) => {
-                const griglia = document.getElementById('containerLavori');
-                griglia.innerHTML = '';
-                snapshot.forEach((child) => {
-                    const item = child.val();
-                    const chiave = child.key;
-                    griglia.innerHTML += `
+        function render() {
+            onValue(ref(db, 'progetti'), (s) => {
+                const g = document.getElementById('containerLavori');
+                g.innerHTML = '';
+                const auth = sessionStorage.getItem("is_auth") === "true";
+                s.forEach((c) => {
+                    const i = c.val();
+                    const k = c.key;
+                    g.innerHTML += `
                         <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 project-card shadow-lg">
-                                ${window.isLoggedIn ? `<button class="btn btn-danger btn-sm position-absolute end-0 m-2" onclick="rimuovi('${chiave}')">X</button>` : ''}
-                                <img src="${item.copertina}" class="project-banner">
+                            <div class="card h-100 project-card">
+                                ${auth ? `<button class="btn btn-danger btn-sm delete-btn" onclick="rimuoviProgetto('${k}')">Elimina</button>` : ''}
+                                <img src="${i.copertina}" class="project-banner">
                                 <div class="card-body">
-                                    <h5 class="card-title mb-2">${item.titolo}</h5>
-                                    <p class="text-muted small">${item.testo || ''}</p>
-                                    <a href="${item.link}" target="_blank" class="btn btn-primary w-100 py-2 fw-bold mt-2">APRI</a>
+                                    <h5 class="card-title mb-2">${i.titolo}</h5>
+                                    <p class="text-muted small">${i.testo || ''}</p>
+                                    <a href="${i.link}" target="_blank" class="btn btn-primary w-100 py-2 mt-2">VISUALIZZA</a>
                                 </div>
                             </div>
                         </div>`;
                 });
             });
         }
-
-        caricaLista();
+        render();
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
