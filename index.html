@@ -3,172 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manuel - Hub</title>
+    <title>Manuel | Control Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0a0a0a; color: #d1d1d1; font-family: sans-serif; }
-        .navbar { background-color: #121212; border-bottom: 1px solid #282828; }
-        .hero { background: #0f0f0f; padding: 60px 0; border-bottom: 1px solid #1f1f1f; }
-        .project-banner { width: 100%; height: auto; aspect-ratio: 720 / 300; object-fit: cover; background-color: #000; }
-        .project-card { background-color: #161616; border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; transition: 0.3s; position: relative; }
-        
-        /* Pannello Admin */
+        :root {
+            --bg-deep: #0d0f12;
+            --bg-card: #161a1f;
+            --accent: #00f2ff;
+            --accent-dim: rgba(0, 242, 255, 0.1);
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+        }
+
+        body { 
+            background-color: var(--bg-deep); 
+            color: var(--text-main); 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        /* Navbar Minimal */
+        .navbar { 
+            background: rgba(13, 15, 18, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #2d3748;
+            padding: 20px 0;
+        }
+
+        .navbar-brand { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent) !important; }
+
+        /* Hero Section */
+        .hero { padding: 100px 0 60px; text-align: center; }
+        .hero h1 { font-weight: 800; font-size: 3.5rem; margin-bottom: 10px; background: linear-gradient(to right, #fff, #64748b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* Grid & Cards */
+        .project-card { 
+            background: var(--bg-card); 
+            border: 1px solid #2d3748; 
+            border-radius: 20px; 
+            overflow: hidden; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+        }
+
+        .project-card:hover { 
+            transform: translateY(-10px); 
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .project-banner { 
+            width: 100%; 
+            aspect-ratio: 16/7; 
+            object-fit: cover; 
+            filter: grayscale(30%);
+            transition: 0.4s;
+        }
+        .project-card:hover .project-banner { filter: grayscale(0%); }
+
+        .card-body { padding: 25px; }
+        .card-title { font-weight: 700; font-size: 1.25rem; margin-bottom: 8px; }
+        .card-text { color: var(--text-dim); font-size: 0.95rem; line-height: 1.6; }
+
+        /* Admin Panel */
         #adminPanel { 
             display: none; 
-            background: #1c1c1c !important; 
-            border-radius: 8px; 
-            padding: 30px; 
-            margin-bottom: 40px; 
-            border: 2px solid #ffc107;
+            background: #1e252e; 
+            border: 1px solid var(--accent); 
+            border-radius: 24px; 
+            padding: 40px; 
+            margin-bottom: 60px;
+            box-shadow: 0 0 30px var(--accent-dim);
         }
-        .form-control { background-color: #222; border: 1px solid #333; color: #fff; }
-        .btn-warning { font-weight: bold; color: #000; }
-        .delete-btn { position: absolute; top: 10px; right: 10px; z-index: 10; }
+
+        .form-control { 
+            background: #0d0f12; 
+            border: 1px solid #2d3748; 
+            color: #fff; 
+            border-radius: 12px; 
+            padding: 12px 15px;
+        }
+        .form-control:focus { background: #161a1f; border-color: var(--accent); box-shadow: none; color: #fff; }
+
+        .btn-accent { 
+            background: var(--accent); 
+            color: #000; 
+            font-weight: 700; 
+            border-radius: 12px; 
+            padding: 12px 25px;
+            transition: 0.3s;
+        }
+        .btn-accent:hover { background: #00d1db; transform: scale(1.02); }
+
+        .delete-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 68, 68, 0.9);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">MANUEL</a>
-            <button class="btn btn-outline-warning btn-sm" onclick="avviaLogin()">Area Riservata</button>
+            <a class="navbar-brand" href="#">MANUEL_HUB.SYS</a>
+            <button class="btn btn-outline-light btn-sm px-4" style="border-radius: 10px;" onclick="handleAuth()">Access</button>
         </div>
     </nav>
 
-    <header class="hero text-center">
+    <header class="hero">
         <div class="container">
-            <h1 class="display-5 fw-bold text-white">Project Hub</h1>
-            <p class="text-muted">Gestione Cloud</p>
+            <h1>Repository</h1>
+            <p style="color: var(--text-dim);">Gestione progetti e risorse cloud</p>
         </div>
     </header>
 
-    <div class="container py-5">
+    <div class="container py-4">
         <div id="adminPanel">
-            <h5 class="mb-4 text-warning fw-bold text-uppercase">Nuovo Progetto</h5>
+            <h4 class="mb-4 fw-bold" style="color: var(--accent)">AGGIORNA SISTEMA</h4>
             <div class="row g-3">
-                <div class="col-md-3"><input type="text" id="pTitle" class="form-control" placeholder="Titolo"></div>
-                <div class="col-md-3"><input type="text" id="pLink" class="form-control" placeholder="URL"></div>
-                <div class="col-md-3"><input type="file" id="pImgFile" class="form-control"></div>
-                <div class="col-md-2"><input type="text" id="pDesc" class="form-control" placeholder="Info"></div>
-                <div class="col-md-1"><button class="btn btn-warning w-100" id="btnSalva" onclick="caricaDati()">+</button></div>
+                <div class="col-md-3"><input type="text" id="tit" class="form-control" placeholder="Nome Progetto"></div>
+                <div class="col-md-3"><input type="text" id="lnk" class="form-control" placeholder="Link (https://...)"></div>
+                <div class="col-md-3"><input type="file" id="img" class="form-control"></div>
+                <div class="col-md-2"><input type="text" id="dsc" class="form-control" placeholder="Breve info"></div>
+                <div class="col-md-1"><button class="btn btn-accent w-100" onclick="upload()">+</button></div>
             </div>
-            <div id="loader" style="display:none;" class="text-warning mt-2 small text-center">Inviando dati...</div>
-            <hr class="border-secondary mt-4">
-            <button class="btn btn-sm btn-outline-danger" onclick="eseguiLogout()">Esci</button>
+            <div id="status" style="display:none;" class="mt-3 text-center small text-info">Sincronizzazione...</div>
+            <div class="mt-4 pt-3 border-top border-dark d-flex justify-content-between">
+                <button class="btn btn-sm btn-outline-danger" onclick="logout()">Spegni sessione</button>
+            </div>
         </div>
 
-        <main id="containerLavori" class="row g-4"></main>
+        <main id="grid" class="row g-4"></main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Credenziali protette
-        const _p1 = "AIzaSyAu6exLNfCQ8D";
-        const _p2 = "5U8yzYtZXKMlX2BELyQMI";
-        const _id = "sito-manuel-75af9";
-        const _db = "-default-rtdb.europe-west1.firebasedatabase.app";
+        // Frammentazione sicurezza
+        const partA = "AIzaSyAu6exLNfCQ8D";
+        const partB = "5U8yzYtZXKMlX2BELyQMI";
+        const dbId = "sito-manuel-75af9";
         
-        const fConfig = {
-            apiKey: _p1 + _p2,
-            authDomain: _id + ".firebaseapp.com",
-            databaseURL: "https://" + _id + _db,
-            projectId: _id,
-            storageBucket: _id + ".firebasestorage.app",
-            messagingSenderId: "967465800949",
-            appId: "1:967465800949:web:77accc2685ac8f2126e1bc"
+        const config = {
+            apiKey: partA + partB,
+            authDomain: `${dbId}.firebaseapp.com`,
+            databaseURL: `https://${dbId}-default-rtdb.europe-west1.firebasedatabase.app`,
+            projectId: dbId
         };
 
-        const app = initializeApp(fConfig);
+        const app = initializeApp(config);
         const db = getDatabase(app);
-        const img_k = "b2bd2cbba6ca" + "0679055dc317" + "aa5bf613";
+        const i_k = "b2bd2cbba6ca" + "0679055dc317" + "aa5bf613";
 
-        // Controllo immediato stato accesso
-        function verificaStato() {
-            if (localStorage.getItem("m_auth") === "active") {
-                document.getElementById('adminPanel').style.display = 'block';
-                return true;
-            }
-            return false;
-        }
+        // Persistenza sessione migliorata
+        const checkSession = () => localStorage.getItem("session_active") === "true";
 
-        window.avviaLogin = async function() {
-            const secret = prompt("Inserisci codice:");
-            if (!secret) return;
+        window.handleAuth = async () => {
+            const key = prompt("Inserisci Chiave d'Accesso:");
+            if (!key) return;
 
             try {
-                const r = ref(db);
-                const s = await get(child(r, 'config/password'));
-                if (s.exists() && secret === s.val()) {
-                    localStorage.setItem("m_auth", "active");
-                    alert("Accesso confermato.");
-                    location.reload(); 
+                const s = await get(child(ref(db), 'config/password'));
+                if (s.exists() && key === s.val()) {
+                    localStorage.setItem("session_active", "true");
+                    alert("Sistema sbloccato.");
+                    location.reload();
                 } else {
-                    alert("Codice errato.");
+                    alert("Chiave errata.");
                 }
-            } catch (e) { alert("Errore connessione database."); }
+            } catch (e) { alert("Errore di rete o permessi Firebase."); }
         };
 
-        window.eseguiLogout = function() {
-            localStorage.removeItem("m_auth");
+        window.logout = () => {
+            localStorage.removeItem("session_active");
             location.reload();
         };
 
-        window.caricaDati = async function() {
-            const t = document.getElementById('pTitle').value;
-            const u = document.getElementById('pLink').value;
-            const d = document.getElementById('pDesc').value;
-            const f = document.getElementById('pImgFile').files[0];
+        window.upload = async () => {
+            const f = document.getElementById('img').files[0];
+            const t = document.getElementById('tit').value;
+            const l = document.getElementById('lnk').value;
+            const d = document.getElementById('dsc').value;
 
-            if (!t || !u || !f) return alert("Compila i campi necessari.");
+            if(!f || !t || !l) return alert("Compila i dati obbligatori.");
 
-            document.getElementById('loader').style.display = 'block';
-            const fd = new FormData();
-            fd.append("image", f);
+            document.getElementById('status').style.display = 'block';
+            const fd = new FormData(); fd.append("image", f);
 
             try {
-                const res = await fetch(`https://api.imgbb.com/1/upload?key=${img_k}`, { method: "POST", body: fd });
-                const data = await res.json();
-                if (data.success) {
-                    await push(ref(db, 'progetti'), {
-                        titolo: t, link: u, testo: d, copertina: data.data.url
-                    });
+                const res = await fetch(`https://api.imgbb.com/1/upload?key=${i_k}`, { method: "POST", body: fd });
+                const json = await res.json();
+                if(json.success) {
+                    await push(ref(db, 'progetti'), { t, l, d, i: json.data.url });
                     location.reload();
                 }
-            } catch (err) { alert("Errore caricamento."); }
+            } catch(e) { alert("Errore durante l'invio."); }
         };
 
-        window.eliminaElemento = async function(id) {
-            if (confirm("Rimuovere definitivamente?")) {
-                await remove(ref(db, `progetti/${id}`));
-            }
+        window.removeItem = async (id) => {
+            if(confirm("Eliminare definitivamente?")) await remove(ref(db, `progetti/${id}`));
         };
 
-        function render() {
-            const isAuth = verificaStato();
+        function start() {
+            const auth = checkSession();
+            if(auth) document.getElementById('adminPanel').style.display = 'block';
+
             onValue(ref(db, 'progetti'), (s) => {
-                const g = document.getElementById('containerLavori');
-                g.innerHTML = '';
+                const grid = document.getElementById('grid');
+                grid.innerHTML = '';
                 s.forEach((c) => {
-                    const i = c.val();
-                    const k = c.key;
-                    g.innerHTML += `
+                    const v = c.val();
+                    grid.innerHTML += `
                         <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 project-card">
-                                ${isAuth ? `<button class="btn btn-danger btn-sm delete-btn" onclick="eliminaElemento('${k}')">Elimina</button>` : ''}
-                                <img src="${i.copertina}" class="project-banner">
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title mb-2">${i.titolo}</h5>
-                                    <p class="text-muted small flex-grow-1">${i.testo || ''}</p>
-                                    <a href="${i.link}" target="_blank" class="btn btn-primary w-100 mt-3 py-2 fw-bold">APRI</a>
+                            <div class="project-card">
+                                ${auth ? `<button class="delete-btn" onclick="removeItem('${c.key}')">RIMUOVI</button>` : ''}
+                                <img src="${v.i}" class="project-banner">
+                                <div class="card-body">
+                                    <h5 class="card-title">${v.t}</h5>
+                                    <p class="card-text">${v.d || ''}</p>
+                                    <a href="${v.l}" target="_blank" class="btn btn-outline-info w-100 mt-2" style="border-radius: 10px;">VEDI PROGETTO</a>
                                 </div>
                             </div>
                         </div>`;
                 });
             });
         }
-        render();
+        start();
     </script>
 </body>
 </html>
