@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manuel | Control Panel</title>
+    <title>THE VAULT | System Control</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -23,7 +23,6 @@
             letter-spacing: -0.02em;
         }
 
-        /* Navbar Minimal */
         .navbar { 
             background: rgba(13, 15, 18, 0.8);
             backdrop-filter: blur(10px);
@@ -31,13 +30,11 @@
             padding: 20px 0;
         }
 
-        .navbar-brand { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent) !important; }
+        .navbar-brand { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent) !important; letter-spacing: 2px; }
 
-        /* Hero Section */
         .hero { padding: 100px 0 60px; text-align: center; }
         .hero h1 { font-weight: 800; font-size: 3.5rem; margin-bottom: 10px; background: linear-gradient(to right, #fff, #64748b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* Grid & Cards */
         .project-card { 
             background: var(--bg-card); 
             border: 1px solid #2d3748; 
@@ -45,6 +42,7 @@
             overflow: hidden; 
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             height: 100%;
+            position: relative;
         }
 
         .project-card:hover { 
@@ -66,7 +64,6 @@
         .card-title { font-weight: 700; font-size: 1.25rem; margin-bottom: 8px; }
         .card-text { color: var(--text-dim); font-size: 0.95rem; line-height: 1.6; }
 
-        /* Admin Panel */
         #adminPanel { 
             display: none; 
             background: #1e252e; 
@@ -92,9 +89,8 @@
             font-weight: 700; 
             border-radius: 12px; 
             padding: 12px 25px;
-            transition: 0.3s;
+            border: none;
         }
-        .btn-accent:hover { background: #00d1db; transform: scale(1.02); }
 
         .delete-btn {
             position: absolute;
@@ -105,7 +101,7 @@
             color: white;
             border-radius: 8px;
             padding: 5px 12px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             z-index: 10;
         }
@@ -115,31 +111,31 @@
 
     <nav class="navbar navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="#">MANUEL_HUB.SYS</a>
+            <a class="navbar-brand" href="#">THE_VAULT.SYS</a>
             <button class="btn btn-outline-light btn-sm px-4" style="border-radius: 10px;" onclick="handleAuth()">Access</button>
         </div>
     </nav>
 
     <header class="hero">
         <div class="container">
-            <h1>Repository</h1>
-            <p style="color: var(--text-dim);">Gestione progetti e risorse cloud</p>
+            <h1>Central Repository</h1>
+            <p style="color: var(--text-dim);">Archivio crittografato progetti cloud</p>
         </div>
     </header>
 
     <div class="container py-4">
         <div id="adminPanel">
-            <h4 class="mb-4 fw-bold" style="color: var(--accent)">AGGIORNA SISTEMA</h4>
+            <h4 class="mb-4 fw-bold" style="color: var(--accent)">UPDATE_SEQUENCE</h4>
             <div class="row g-3">
                 <div class="col-md-3"><input type="text" id="tit" class="form-control" placeholder="Nome Progetto"></div>
                 <div class="col-md-3"><input type="text" id="lnk" class="form-control" placeholder="Link (https://...)"></div>
                 <div class="col-md-3"><input type="file" id="img" class="form-control"></div>
-                <div class="col-md-2"><input type="text" id="dsc" class="form-control" placeholder="Breve info"></div>
+                <div class="col-md-2"><input type="text" id="dsc" class="form-control" placeholder="Dettagli"></div>
                 <div class="col-md-1"><button class="btn btn-accent w-100" onclick="upload()">+</button></div>
             </div>
             <div id="status" style="display:none;" class="mt-3 text-center small text-info">Sincronizzazione...</div>
-            <div class="mt-4 pt-3 border-top border-dark d-flex justify-content-between">
-                <button class="btn btn-sm btn-outline-danger" onclick="logout()">Spegni sessione</button>
+            <div class="mt-4 pt-3 border-top border-dark">
+                <button class="btn btn-sm btn-outline-danger" onclick="logout()">Terminate session</button>
             </div>
         </div>
 
@@ -150,39 +146,31 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Frammentazione sicurezza
-        const partA = "AIzaSyAu6exLNfCQ8D";
-        const partB = "5U8yzYtZXKMlX2BELyQMI";
-        const dbId = "sito-manuel-75af9";
-        
         const config = {
-            apiKey: partA + partB,
-            authDomain: `${dbId}.firebaseapp.com`,
-            databaseURL: `https://${dbId}-default-rtdb.europe-west1.firebasedatabase.app`,
-            projectId: dbId
+            apiKey: "AIzaSyAu6exLNfCQ8D" + "5U8yzYtZXKMlX2BELyQMI",
+            authDomain: "sito-manuel-75af9.firebaseapp.com",
+            databaseURL: "https://sito-manuel-75af9-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "sito-manuel-75af9"
         };
 
         const app = initializeApp(config);
         const db = getDatabase(app);
         const i_k = "b2bd2cbba6ca" + "0679055dc317" + "aa5bf613";
 
-        // Persistenza sessione migliorata
-        const checkSession = () => localStorage.getItem("session_active") === "true";
+        const _p1 = "Manuel";
+        const _p2 = "257103";
+        const ACCESS_KEY = _p1 + _p2;
 
-        window.handleAuth = async () => {
-            const key = prompt("Inserisci Chiave d'Accesso:");
-            if (!key) return;
-
-            try {
-                const s = await get(child(ref(db), 'config/password'));
-                if (s.exists() && key === s.val()) {
-                    localStorage.setItem("session_active", "true");
-                    alert("Sistema sbloccato.");
-                    location.reload();
-                } else {
-                    alert("Chiave errata.");
-                }
-            } catch (e) { alert("Errore di rete o permessi Firebase."); }
+        window.handleAuth = () => {
+            const inserita = prompt("Access Key Required:");
+            if (!inserita) return;
+            if (inserita === ACCESS_KEY) {
+                localStorage.setItem("session_active", "true");
+                alert("Access Granted.");
+                location.reload();
+            } else {
+                alert("Access Denied.");
+            }
         };
 
         window.logout = () => {
@@ -196,7 +184,7 @@
             const l = document.getElementById('lnk').value;
             const d = document.getElementById('dsc').value;
 
-            if(!f || !t || !l) return alert("Compila i dati obbligatori.");
+            if(!f || !t || !l) return alert("Missing required fields.");
 
             document.getElementById('status').style.display = 'block';
             const fd = new FormData(); fd.append("image", f);
@@ -208,15 +196,15 @@
                     await push(ref(db, 'progetti'), { t, l, d, i: json.data.url });
                     location.reload();
                 }
-            } catch(e) { alert("Errore durante l'invio."); }
+            } catch(e) { alert("Upload error."); }
         };
 
         window.removeItem = async (id) => {
-            if(confirm("Eliminare definitivamente?")) await remove(ref(db, `progetti/${id}`));
+            if(confirm("Confirm deletion?")) await remove(ref(db, `progetti/${id}`));
         };
 
         function start() {
-            const auth = checkSession();
+            const auth = localStorage.getItem("session_active") === "true";
             if(auth) document.getElementById('adminPanel').style.display = 'block';
 
             onValue(ref(db, 'progetti'), (s) => {
@@ -227,12 +215,12 @@
                     grid.innerHTML += `
                         <div class="col-md-6 col-lg-4">
                             <div class="project-card">
-                                ${auth ? `<button class="delete-btn" onclick="removeItem('${c.key}')">RIMUOVI</button>` : ''}
+                                ${auth ? `<button class="delete-btn" onclick="removeItem('${c.key}')">REMOVE</button>` : ''}
                                 <img src="${v.i}" class="project-banner">
                                 <div class="card-body">
-                                    <h5 class="card-title">${v.t}</h5>
+                                    <h5 class="card-title text-white">${v.t}</h5>
                                     <p class="card-text">${v.d || ''}</p>
-                                    <a href="${v.l}" target="_blank" class="btn btn-outline-info w-100 mt-2" style="border-radius: 10px;">VEDI PROGETTO</a>
+                                    <a href="${v.l}" target="_blank" class="btn btn-outline-info w-100 mt-2" style="border-radius: 10px;">OPEN_LINK</a>
                                 </div>
                             </div>
                         </div>`;
