@@ -6,16 +6,14 @@
     <title>Manuel - Portfolio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Design Deep Dark */
         body { 
             background-color: #0a0a0a; 
             color: #d1d1d1; 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
         }
         .navbar { background-color: #121212; border-bottom: 1px solid #282828; }
         .hero { background: #0f0f0f; padding: 70px 0; border-bottom: 1px solid #1f1f1f; }
         
-        /* Banner con rapporto 720:300 */
         .project-banner { 
             width: 100%; 
             height: auto; 
@@ -30,6 +28,7 @@
             border-radius: 10px; 
             overflow: hidden; 
             transition: all 0.3s ease;
+            position: relative;
         }
         .project-card:hover { 
             transform: translateY(-5px); 
@@ -37,7 +36,7 @@
             border-color: #3f3f3f;
         }
 
-        .card-title { color: #ffffff; font-weight: 600; letter-spacing: 0.5px; }
+        .card-title { color: #ffffff; font-weight: 600; text-transform: uppercase; }
         .text-muted { color: #7a7a7a !important; }
 
         #adminPanel { 
@@ -62,9 +61,8 @@
             box-shadow: none;
         }
 
-        .btn-primary { background-color: #2962ff; border: none; font-weight: 500; }
+        .btn-primary { background-color: #2962ff; border: none; }
         .btn-warning { font-weight: 700; color: #000; }
-        
         .status-msg { display: none; color: #ffc107; font-size: 0.9rem; margin-top: 10px; }
     </style>
 </head>
@@ -80,20 +78,20 @@
     <header class="hero text-center">
         <div class="container">
             <h1 class="display-5 fw-bold text-white">Project Hub</h1>
-            <p class="text-muted">Raccolta dei lavori e delle applicazioni web.</p>
+            <p class="text-muted">Archivio progetti e applicazioni web.</p>
         </div>
     </header>
 
     <div class="container py-5">
         <div id="adminPanel">
-            <h5 class="mb-4 text-uppercase fw-bold text-warning">Inserimento Progetto</h5>
+            <h5 class="mb-4 text-uppercase fw-bold text-warning">Gestione Contenuti</h5>
             <div class="row g-3">
                 <div class="col-md-3">
-                    <label class="small text-muted">Nome</label>
+                    <label class="small text-muted">Titolo</label>
                     <input type="text" id="pTitle" class="form-control">
                 </div>
                 <div class="col-md-3">
-                    <label class="small text-muted">URL</label>
+                    <label class="small text-muted">Link</label>
                     <input type="text" id="pLink" class="form-control" placeholder="https://...">
                 </div>
                 <div class="col-md-3">
@@ -101,14 +99,14 @@
                     <input type="file" id="pImgFile" class="form-control" accept="image/*">
                 </div>
                 <div class="col-md-2">
-                    <label class="small text-muted">Descrizione</label>
+                    <label class="small text-muted">Sottotitolo</label>
                     <input type="text" id="pDesc" class="form-control">
                 </div>
                 <div class="col-md-1 d-flex align-items-end">
                     <button class="btn btn-warning w-100 fw-bold" id="btnSalva" onclick="pubblica()">+</button>
                 </div>
             </div>
-            <div id="loader" class="status-msg text-center">Trasferimento dati al server...</div>
+            <div id="loader" class="status-msg text-center">Sincronizzazione in corso...</div>
             <div class="mt-4 border-top border-secondary pt-3">
                 <button class="btn btn-sm btn-outline-secondary" onclick="chiudiGestione()">Esci</button>
             </div>
@@ -121,7 +119,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const config = {
+        const firebaseConfig = {
             apiKey: "AIzaSyAu6exLNfCQ8D5U8yzYtZXKMlX2BELyQMI",
             authDomain: "sito-manuel-75af9.firebaseapp.com",
             databaseURL: "https://sito-manuel-75af9-default-rtdb.europe-west1.firebasedatabase.app",
@@ -131,28 +129,33 @@
             appId: "1:967465800949:web:77accc2685ac8f2126e1bc"
         };
 
-        const app = initializeApp(config);
+        const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const CHIAVE_IMGBB = "b2bd2cbba6ca0679055dc317aa5bf613";
 
         window.modalitaAdmin = false;
 
-        // Funzione di validazione tramite Firebase
         window.apriGestione = async () => {
-            const passInserita = prompt("Credenziali richieste:");
+            const passInserita = prompt("Inserisci la password di sistema:");
             if (!passInserita) return;
 
             try {
-                const snapshot = await get(child(ref(db), 'config/password'));
-                if (snapshot.exists() && passInserita === snapshot.val()) {
-                    window.modalitaAdmin = true;
-                    document.getElementById('adminPanel').style.display = 'block';
-                    mostraContenuti();
+                const dbRef = ref(db);
+                const snapshot = await get(child(dbRef, 'config/password'));
+                
+                if (snapshot.exists()) {
+                    if (passInserita === snapshot.val()) {
+                        window.modalitaAdmin = true;
+                        document.getElementById('adminPanel').style.display = 'block';
+                        mostraContenuti();
+                    } else {
+                        alert("Password non corretta.");
+                    }
                 } else {
-                    alert("Credenziali non valide.");
+                    alert("Configurazione non trovata.");
                 }
-            } catch (e) {
-                alert("Errore di rete.");
+            } catch (error) {
+                alert("Errore di connessione al database.");
             }
         };
 
@@ -168,7 +171,7 @@
             const d = document.getElementById('pDesc').value;
             const f = document.getElementById('pImgFile').files[0];
 
-            if (!t || !u || !f) return alert("Inserire i dati richiesti.");
+            if (!t || !u || !f) return alert("Compilare tutti i campi.");
 
             document.getElementById('loader').style.display = 'block';
             document.getElementById('btnSalva').disabled = true;
@@ -192,15 +195,16 @@
                     document.getElementById('pDesc').value = '';
                     document.getElementById('pImgFile').value = '';
                 }
-            } catch (err) { alert("Errore nel processo."); }
-            finally {
+            } catch (err) {
+                alert("Errore caricamento dati.");
+            } finally {
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('btnSalva').disabled = false;
             }
         };
 
         window.rimuovi = (id) => {
-            if (confirm("Confermare l'eliminazione definitiva?")) {
+            if (confirm("Eliminare definitivamente?")) {
                 remove(ref(db, `progetti/${id}`));
             }
         };
@@ -215,12 +219,12 @@
                     griglia.innerHTML += `
                         <div class="col-md-6 col-lg-4">
                             <div class="card h-100 project-card shadow-lg">
-                                ${window.modalitaAdmin ? `<button class="btn btn-danger btn-sm position-absolute end-0 m-2 shadow" onclick="rimuovi('${chiave}')">Rimuovi</button>` : ''}
+                                ${window.modalitaAdmin ? `<button class="btn btn-danger btn-sm position-absolute end-0 m-2 shadow" onclick="rimuovi('${chiave}')">X</button>` : ''}
                                 <img src="${val.copertina}" class="project-banner">
                                 <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title mb-2 text-uppercase">${val.titolo}</h5>
+                                    <h5 class="card-title mb-2">${val.titolo}</h5>
                                     <p class="text-muted small flex-grow-1">${val.testo}</p>
-                                    <a href="${val.link}" target="_blank" class="btn btn-primary w-100 mt-3 py-2">Visualizza</a>
+                                    <a href="${val.link}" target="_blank" class="btn btn-primary w-100 mt-3 py-2 fw-bold">APRI</a>
                                 </div>
                             </div>
                         </div>`;
@@ -232,4 +236,3 @@
     </script>
 </body>
 </html>
-
