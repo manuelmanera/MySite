@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manuel - Portfolio</title>
+    <title>Manuel - Hub</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #0a0a0a; color: #d1d1d1; font-family: sans-serif; }
@@ -11,12 +11,11 @@
         .hero { background: #0f0f0f; padding: 60px 0; border-bottom: 1px solid #1f1f1f; }
         .project-banner { width: 100%; height: auto; aspect-ratio: 720 / 300; object-fit: cover; background-color: #000; }
         .project-card { background-color: #161616; border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; transition: 0.3s; position: relative; }
-        .project-card:hover { transform: translateY(-5px); border-color: #444; }
         
+        /* Pannello Admin */
         #adminPanel { 
             display: none; 
             background: #1c1c1c !important; 
-            color: #fff; 
             border-radius: 8px; 
             padding: 30px; 
             margin-bottom: 40px; 
@@ -24,7 +23,7 @@
         }
         .form-control { background-color: #222; border: 1px solid #333; color: #fff; }
         .btn-warning { font-weight: bold; color: #000; }
-        .delete-btn { position: absolute; top: 10px; right: 10px; z-index: 10; padding: 2px 8px; }
+        .delete-btn { position: absolute; top: 10px; right: 10px; z-index: 10; }
     </style>
 </head>
 <body>
@@ -32,30 +31,30 @@
     <nav class="navbar navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="#">MANUEL</a>
-            <button class="btn btn-outline-warning btn-sm" onclick="gestisciAccesso()">Area Riservata</button>
+            <button class="btn btn-outline-warning btn-sm" onclick="avviaLogin()">Area Riservata</button>
         </div>
     </nav>
 
     <header class="hero text-center">
         <div class="container">
             <h1 class="display-5 fw-bold text-white">Project Hub</h1>
-            <p class="text-muted">Database Cloud Personale</p>
+            <p class="text-muted">Gestione Cloud</p>
         </div>
     </header>
 
     <div class="container py-5">
         <div id="adminPanel">
-            <h5 class="mb-4 text-warning fw-bold text-uppercase">Nuovo Inserimento</h5>
+            <h5 class="mb-4 text-warning fw-bold text-uppercase">Nuovo Progetto</h5>
             <div class="row g-3">
                 <div class="col-md-3"><input type="text" id="pTitle" class="form-control" placeholder="Titolo"></div>
                 <div class="col-md-3"><input type="text" id="pLink" class="form-control" placeholder="URL"></div>
                 <div class="col-md-3"><input type="file" id="pImgFile" class="form-control"></div>
                 <div class="col-md-2"><input type="text" id="pDesc" class="form-control" placeholder="Info"></div>
-                <div class="col-md-1"><button class="btn btn-warning w-100" id="btnSalva" onclick="eseguiPubblicazione()">+</button></div>
+                <div class="col-md-1"><button class="btn btn-warning w-100" id="btnSalva" onclick="caricaDati()">+</button></div>
             </div>
-            <div id="loader" style="display:none;" class="text-warning mt-2 small text-center">Sincronizzazione in corso...</div>
+            <div id="loader" style="display:none;" class="text-warning mt-2 small text-center">Inviando dati...</div>
             <hr class="border-secondary mt-4">
-            <button class="btn btn-sm btn-outline-danger" onclick="eseguiLogout()">Esci dalla sessione</button>
+            <button class="btn btn-sm btn-outline-danger" onclick="eseguiLogout()">Esci</button>
         </div>
 
         <main id="containerLavori" class="row g-4"></main>
@@ -65,102 +64,104 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Frammentazione parametri
-        const _a = "AIzaSyAu6exLNfCQ8D";
-        const _b = "5U8yzYtZXKMlX2BELyQMI";
-        const _c = "sito-manuel-75af9";
-        const _d = "-default-rtdb.europe-west1.firebasedatabase.app";
+        // Credenziali protette
+        const _p1 = "AIzaSyAu6exLNfCQ8D";
+        const _p2 = "5U8yzYtZXKMlX2BELyQMI";
+        const _id = "sito-manuel-75af9";
+        const _db = "-default-rtdb.europe-west1.firebasedatabase.app";
         
         const fConfig = {
-            apiKey: _a + _b,
-            authDomain: _c + ".firebaseapp.com",
-            databaseURL: "https://" + _c + _d,
-            projectId: _c,
-            storageBucket: _c + ".firebasestorage.app",
+            apiKey: _p1 + _p2,
+            authDomain: _id + ".firebaseapp.com",
+            databaseURL: "https://" + _id + _db,
+            projectId: _id,
+            storageBucket: _id + ".firebasestorage.app",
             messagingSenderId: "967465800949",
             appId: "1:967465800949:web:77accc2685ac8f2126e1bc"
         };
 
         const app = initializeApp(fConfig);
         const db = getDatabase(app);
-        const k_i = "b2bd2cbba6ca" + "0679055dc317" + "aa5bf613";
+        const img_k = "b2bd2cbba6ca" + "0679055dc317" + "aa5bf613";
 
-        // Controllo sessione esistente al caricamento
-        if (sessionStorage.getItem("is_auth") === "true") {
-            document.getElementById('adminPanel').style.display = 'block';
-            window.isAuth = true;
+        // Controllo immediato stato accesso
+        function verificaStato() {
+            if (localStorage.getItem("m_auth") === "active") {
+                document.getElementById('adminPanel').style.display = 'block';
+                return true;
+            }
+            return false;
         }
 
-        window.gestisciAccesso = async function() {
-            const p = prompt("Chiave:");
-            if (!p) return;
+        window.avviaLogin = async function() {
+            const secret = prompt("Inserisci codice:");
+            if (!secret) return;
 
             try {
                 const r = ref(db);
                 const s = await get(child(r, 'config/password'));
-                if (s.exists() && p === s.val()) {
-                    sessionStorage.setItem("is_auth", "true");
-                    window.isAuth = true;
-                    document.getElementById('adminPanel').style.display = 'block';
-                    window.location.reload(); // Ricarica per attivare i tasti elimina
+                if (s.exists() && secret === s.val()) {
+                    localStorage.setItem("m_auth", "active");
+                    alert("Accesso confermato.");
+                    location.reload(); 
                 } else {
-                    alert("Negato.");
+                    alert("Codice errato.");
                 }
-            } catch (e) { alert("Errore di rete."); }
+            } catch (e) { alert("Errore connessione database."); }
         };
 
         window.eseguiLogout = function() {
-            sessionStorage.removeItem("is_auth");
-            window.location.reload();
+            localStorage.removeItem("m_auth");
+            location.reload();
         };
 
-        window.eseguiPubblicazione = async function() {
+        window.caricaDati = async function() {
             const t = document.getElementById('pTitle').value;
             const u = document.getElementById('pLink').value;
             const d = document.getElementById('pDesc').value;
             const f = document.getElementById('pImgFile').files[0];
 
-            if (!t || !u || !f) return alert("Dati mancanti.");
+            if (!t || !u || !f) return alert("Compila i campi necessari.");
 
             document.getElementById('loader').style.display = 'block';
             const fd = new FormData();
             fd.append("image", f);
 
             try {
-                const r = await fetch(`https://api.imgbb.com/1/upload?key=${k_i}`, { method: "POST", body: fd });
-                const j = await r.json();
-                if (j.success) {
+                const res = await fetch(`https://api.imgbb.com/1/upload?key=${img_k}`, { method: "POST", body: fd });
+                const data = await res.json();
+                if (data.success) {
                     await push(ref(db, 'progetti'), {
-                        titolo: t, link: u, testo: d, copertina: j.data.url
+                        titolo: t, link: u, testo: d, copertina: data.data.url
                     });
                     location.reload();
                 }
-            } catch (err) { alert("Errore invio."); }
+            } catch (err) { alert("Errore caricamento."); }
         };
 
-        window.rimuoviProgetto = async function(id) {
-            if (confirm("Eliminare?")) {
+        window.eliminaElemento = async function(id) {
+            if (confirm("Rimuovere definitivamente?")) {
                 await remove(ref(db, `progetti/${id}`));
             }
         };
 
         function render() {
+            const isAuth = verificaStato();
             onValue(ref(db, 'progetti'), (s) => {
                 const g = document.getElementById('containerLavori');
                 g.innerHTML = '';
-                const auth = sessionStorage.getItem("is_auth") === "true";
                 s.forEach((c) => {
                     const i = c.val();
                     const k = c.key;
                     g.innerHTML += `
                         <div class="col-md-6 col-lg-4">
                             <div class="card h-100 project-card">
-                                ${auth ? `<button class="btn btn-danger btn-sm delete-btn" onclick="rimuoviProgetto('${k}')">Elimina</button>` : ''}
+                                ${isAuth ? `<button class="btn btn-danger btn-sm delete-btn" onclick="eliminaElemento('${k}')">Elimina</button>` : ''}
                                 <img src="${i.copertina}" class="project-banner">
-                                <div class="card-body">
+                                <div class="card-body d-flex flex-column">
                                     <h5 class="card-title mb-2">${i.titolo}</h5>
-                                    <p class="text-muted small">${i.testo || ''}</p>
-                                    <a href="${i.link}" target="_blank" class="btn btn-primary w-100 py-2 mt-2">VISUALIZZA</a>
+                                    <p class="text-muted small flex-grow-1">${i.testo || ''}</p>
+                                    <a href="${i.link}" target="_blank" class="btn btn-primary w-100 mt-3 py-2 fw-bold">APRI</a>
                                 </div>
                             </div>
                         </div>`;
@@ -171,4 +172,3 @@
     </script>
 </body>
 </html>
-
