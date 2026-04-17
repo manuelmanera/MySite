@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE VAULT | System Control</title>
+    <title>M-PROJECT | Manuel Manera</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -111,15 +111,15 @@
 
     <nav class="navbar navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="#">THE_VAULT</a>
+            <a class="navbar-brand" href="#">THE_VAULT.SYS</a>
             <button class="btn btn-outline-light btn-sm px-4" style="border-radius: 10px;" onclick="handleAuth()">Access</button>
         </div>
     </nav>
 
     <header class="hero">
         <div class="container">
-            <h1>Central Repository</h1>
-            <p style="color: var(--text-dim);">Archivio crittografato progetti cloud</p>
+            <h1>M-PROJECT</h1>
+            <p style="color: var(--text-dim);">All the projects of Manuel Manera</p>
         </div>
     </header>
 
@@ -127,10 +127,10 @@
         <div id="adminPanel">
             <h4 class="mb-4 fw-bold" style="color: var(--accent)">UPDATE_SEQUENCE</h4>
             <div class="row g-3">
-                <div class="col-md-3"><input type="text" id="tit" class="form-control" placeholder="Nome Progetto"></div>
+                <div class="col-md-3"><input type="text" id="tit" class="form-control" placeholder="Project Name"></div>
                 <div class="col-md-3"><input type="text" id="lnk" class="form-control" placeholder="Link (https://...)"></div>
                 <div class="col-md-3"><input type="file" id="img" class="form-control"></div>
-                <div class="col-md-2"><input type="text" id="dsc" class="form-control" placeholder="Dettagli"></div>
+                <div class="col-md-2"><input type="text" id="dsc" class="form-control" placeholder="Details"></div>
                 <div class="col-md-1"><button class="btn btn-accent w-100" onclick="upload()">+</button></div>
             </div>
             <div id="status" style="display:none;" class="mt-3 text-center small text-info">Sincronizzazione...</div>
@@ -157,6 +157,7 @@
         const db = getDatabase(app);
         const i_k = "b2bd2cbba6ca" + "0679055dc317" + "aa5bf613";
 
+        // Password integrata
         const _p1 = "Manuel";
         const _p2 = "257103";
         const ACCESS_KEY = _p1 + _p2;
